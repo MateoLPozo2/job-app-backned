@@ -1,4 +1,9 @@
-// routes/users.js
-router.get('/me', authMiddleware, (req, res) => {
-  res.json({ message: 'Access granted', user: req.user });
+const express = require('express');
+const router = express.Router();
+const protect = require('../middleware/authMiddleware');
+
+router.get('/me', protect, (req, res) => {
+  res.status(200).json(req.user);
 });
+
+module.exports = router;
