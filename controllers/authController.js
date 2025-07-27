@@ -79,4 +79,39 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
+  exports.register = async (req, res) => {
+  try {
+    console.log('Received request:', req.body);
+
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      console.log('Missing fields');
+      return res.status(400).json({ message: 'Please fill all fields.' });
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      console.log('User already exists');
+      return res.status(400).json({ message: 'User already exists.' });
+    }
+
+    const user = await User.create({ name, email, password });
+    const token = signToken(user);
+
+    console.log('User created:', user.email);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (err) {
+    console.error('Registration error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 };
