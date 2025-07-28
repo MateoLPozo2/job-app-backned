@@ -16,7 +16,8 @@ app.use(express.urlencoded({ extended: false }));
 // Routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
-app.use('/api/users', require('./routes/users'));
+const userRoutes = require('./routes/users')
+app.use('/api/users', userRoutes);
 //app.use('/api/jobs', require('./routes/jobs'));
 //app.use('/api/applications', require('./routes/applications'));
 
