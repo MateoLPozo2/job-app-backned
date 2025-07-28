@@ -18,8 +18,10 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 const userRoutes = require('./routes/users')
 app.use('/api/users', userRoutes);
-//app.use('/api/jobs', require('./routes/jobs'));
-//app.use('/api/applications', require('./routes/applications'));
+const applicationRoutes = require('./routes/applications');
+app.use('/api/applications', applicationRoutes);
+const jobRoutes = require('./routes/jobs');
+app.use('/api/jobs', jobRoutes);
 
 // Health check route
 app.get('/', (req, res) => res.send('API Running'));
