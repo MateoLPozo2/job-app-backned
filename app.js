@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const fs = require('fs');
+const https = require('https');
 
 dotenv.config();
 connectDB();
@@ -28,4 +30,13 @@ app.get('/', (req, res) => res.send('API Running'));
 
 // Start server
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+const httpsOptions = {
+  key: fs.readFileSync('./server.key'),
+  cert: fs.readFileSync('./server.cert'),
+};
+
+// Start HTTPS server
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`HTTPS Server running on port ${PORT}`);
+});
