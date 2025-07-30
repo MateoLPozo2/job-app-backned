@@ -17,7 +17,7 @@ router.post('/:id/upload', protect, upload.single('file'), async (req, res) => {
     if (!app) return res.status(404).json({ message: 'Application not found' });
 
     // Save file path in Application
-    app.resume = req.file.filename; // or req.file.path if you prefer
+    app.resume = req.file.filename; 
     await app.save();
 
     res.status(200).json({ message: 'File uploaded!', file: req.file.filename });

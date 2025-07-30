@@ -1,0 +1,58 @@
+1. Register User
+POST /api/auth/register
+
+{
+  "name": "Alice Example",
+  "email": "alice@example.com",
+  "password": "strongpassword123"
+}
+
+2. Login User
+POST /api/auth/login
+
+{
+  "email": "alice@example.com",
+  "password": "strongpassword123"
+}
+
+3. List All Jobs
+GET /api/jobs
+No body needed.
+
+4. Create Job Post
+POST /api/jobs
+
+{
+  "title": "Full Stack Developer",
+  "description": "Looking for experienced dev.",
+  "company": "TechCorp",
+  "location": "Berlin"
+}
+
+5. Apply for Job
+(Requires JWT Bearer token in header + JobID)
+POST /api/applications
+
+{
+  "job": "<JobID>",
+  "coverLetter": "I am interested in this role because..."
+}
+
+5.1. Upload File
+(Requires JWT Bearer token in header + ApplicationID)
+POST /api/applications/<ApplicationID>/upload
+Body:
+Select form-data
+Key: file (Type: File)
+Value: (pick your PDF or DOC file)
+
+5.2 See uploaded file
+GET /api/uploads/<UploadedFileID>
+
+6. Get User Info
+GET /api/users/me
+Header: Authorization: Bearer <JWT>
+No body needed.
+
+7. Populated data
+GET /api/applications

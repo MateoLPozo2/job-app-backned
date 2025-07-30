@@ -1,46 +1,54 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 const fs = require('fs');
 const https = require('https');
+const path = require('path');
+const connectDB = require('./config/db');
 
-dotenv.config();
+// Load environment variables from the specified .env file (or default to .env)
+dotenv.config({ path: process.env.ENV_FILE || '.env' });
+
+// Debug: Print important environment variables to verify they are loaded
+console.log('[DEBUG] ENV_FILE:', process.env.ENV_FILE);
+console.log('[DEBUG] MONGO_URI:', process.env.MONGO_URI || process.env.MONGODB_URI);
+console.log('[DEBUG] JWT_SECRET:', process.env.JWT_SECRET);
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// Uploads
-const path = require('path');
+// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
-app.use(cors());
+app.use(cors()); // (For prod, use CORS options as discussed)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-const userRoutes = require('./routes/users')
-app.use('/api/users', userRoutes);
+const userRoutes = require('./routes/users');
 const applicationRoutes = require('./routes/applications');
-app.use('/api/applications', applicationRoutes);
 const jobRoutes = require('./routes/jobs');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/applications', applicationRoutes);
 app.use('/api/jobs', jobRoutes);
 
 // Health check route
 app.get('/', (req, res) => res.send('API Running'));
 
-// Start server
-const PORT = process.env.PORT || 5001;
-
+// HTTPS Options
 const httpsOptions = {
-  key: fs.readFileSync('./server.key'),
-  cert: fs.readFileSync('./server.cert'),
+  key: fs.readFileSync(process.env.SSL_KEY_PATH || './server.key'),
+  cert: fs.readFileSync(process.env.SSL_CERT_PATH || './server.cert'),
 };
 
-// Start HTTPS server
+// Start server
+const PORT = process.env.PORT || 5001;
 https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`HTTPS Server running on port ${PORT}`);
 });
