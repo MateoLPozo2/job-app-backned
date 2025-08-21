@@ -1,8 +1,12 @@
+// controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // Helper: sign JWT
 const signToken = (user) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set');
+  }
   return jwt.sign(
     { id: user._id, email: user.email },
     process.env.JWT_SECRET,
@@ -14,7 +18,9 @@ const signToken = (user) => {
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
 
     // Basic validation
     if (!name || !email || !password) {
@@ -24,14 +30,14 @@ exports.register = async (req, res) => {
     // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists.' });
+      return res.status(409).json({ message: 'User already exists.' });
     }
 
     // Create user
     const user = await User.create({ name, email, password });
     const token = signToken(user);
 
-    res.status(201).json({
+    return res.status(201).json({
       token,
       user: {
         id: user._id,
@@ -40,7 +46,8 @@ exports.register = async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('[auth.register] error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -48,7 +55,8 @@ exports.register = async (req, res) => {
 // @route   POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
 
     // Basic validation
     if (!email || !password) {
@@ -68,7 +76,7 @@ exports.login = async (req, res) => {
 
     const token = signToken(user);
 
-    res.json({
+    return res.status(200).json({
       token,
       user: {
         id: user._id,
@@ -77,41 +85,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('[auth.login] error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
-  exports.register = async (req, res) => {
-  try {
-    console.log('Received request:', req.body);
-
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      console.log('Missing fields');
-      return res.status(400).json({ message: 'Please fill all fields.' });
-    }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      console.log('User already exists');
-      return res.status(400).json({ message: 'User already exists.' });
-    }
-
-    const user = await User.create({ name, email, password });
-    const token = signToken(user);
-
-    console.log('User created:', user.email);
-
-    res.status(201).json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
-      }
-    });
-  } catch (err) {
-    console.error('Registration error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
 };
