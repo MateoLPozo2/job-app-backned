@@ -23,7 +23,22 @@ const app = express();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
-app.use(cors()); // (For prod, use CORS options as discussed)
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS not allowed from this origin'));
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
